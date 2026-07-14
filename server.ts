@@ -90,11 +90,12 @@ async function startServer() {
   let aiInstance: GoogleGenAI | null = null;
   function getGenAI(): GoogleGenAI {
     if (!aiInstance) {
-      if (!process.env.GEMINI_API_KEY) {
-        throw new Error("GEMINI_API_KEY environment variable is required");
+      const key = process.env.GEMINI_API_KEY;
+      if (!key || key.trim() === "" || key === "MY_GEMINI_API_KEY" || key.startsWith("YOUR_")) {
+        throw new Error("GEMINI_API_KEY가 설정되지 않았습니다. AI Studio 우측 상단의 Settings -> Secrets 메뉴에서 실제 구글 제미나이 API 키(GEMINI_API_KEY)를 등록해 주세요.");
       }
       aiInstance = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: key,
         httpOptions: {
           headers: {
             "User-Agent": "aistudio-build",
@@ -147,8 +148,7 @@ async function startServer() {
     } catch (err: any) {
       console.error("Gemini API server proxy failed:", err);
       res.status(500).json({
-        error: "선생님, 통신 모듈 오류 또는 서버 에러가 발생하여 답변할 수 없습니다. 잠시 후 상단 새로고침을 눌러 다시 질문해주세요.",
-        details: err.message,
+        error: err.message || "통신 모듈 오류 또는 서버 에러가 발생했습니다.",
       });
     }
   });

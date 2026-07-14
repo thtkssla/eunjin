@@ -110,11 +110,17 @@ export default function App() {
       setMessages(prev => [...prev, { role: "bot", text: data.text }]);
     } catch (error: any) {
       console.error(error);
+      const isApiKeyError = error.message && (error.message.includes("GEMINI_API_KEY") || error.message.includes("API key"));
+      
+      const errorText = isApiKeyError 
+        ? "선생님, 현재 AI 답변 시스템을 이용하기 위한 API 키가 올바르게 설정되지 않았습니다.\n\n**[해결 방법]**:\n우측 상단의 **설정 메뉴(Settings 톱니바퀴 아이콘) -> Secrets** 메뉴로 이동하셔서 **GEMINI_API_KEY**라는 이름으로 실제 구글 제미나이 API 키를 입력해 주시기 바랍니다!"
+        : `선생님, 답변을 불러오는 중에 오류가 발생했습니다.\n\n**[상세 오류 내용]**:\n${error.message || "서버 통신 실패"}\n\n잠시 후 다시 질문해주시기 바랍니다!`;
+
       setMessages(prev => [
         ...prev, 
         { 
           role: "bot", 
-          text: "선생님, 서버 인터넷 연결 상태 오류로 답변을 로딩하지 못했습니다. 상단 새로고침 버튼을 누르고 잠시 후 다시 질문해주시기 바랍니다!" 
+          text: errorText
         }
       ]);
     } finally {
